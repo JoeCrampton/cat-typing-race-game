@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat Typing Race</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', cursive;
+            background: linear-gradient(135deg, #87CEEB 0%, #98FB98 50%, #FFE4B5 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            overflow-x: hidden;
+            margin: 0;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 1000px;
+            width: 100%;
+            text-align: center;
+            max-height: 95vh;
+            overflow-y: auto;
+        }
+
+        h1 {
+            color: #ff6b6b;
+            font-size: 2em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .race-track {
+            background: rgba(144, 238, 144, 0.3);
+            border-radius: 15px;
+            padding: 15px;
+            margin: 10px 0;
+            border: 3px solid #32CD32;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .track-lane {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            position: relative;
+            border: 2px dashed #ccc;
+        }
+
+        .cat-racer {
+            font-size: 2.5em;
+            position: absolute;
+            left: 0;
+            transition: left 0.3s ease;
+            z-index: 10;
+        }
+
+        .player-cat {
+            color: #ff6b6b;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .ai-cat {
+            color: #4169E1;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .finish-line {
+            position: absolute;
+            right: 10px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(to bottom, #ff0000, #ffffff, #ff0000, #ffffff, #ff0000);
+            border-radius: 2px;
+        }
+
+        .lane-label {
+            position: absolute;
+            left: 10px;
+            top: 5px;
+            font-size: 0.9em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .speed-display {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        .player-speed {
+            color: #ff6b6b;
+        }
+
+        .ai-speed {
+            color: #4169E1;
+        }
+
+        .word-display {
+            font-size: 1.8em;
+            color: #333;
+            margin: 15px 0;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 15px;
+            border: 3px solid #ff6b6b;
+        }
+
+        .typed-letter {
+            color: #4ecdc4;
+            background: rgba(76, 205, 196, 0.2);
+            border-radius: 5px;
+            padding: 2px 4px;
+        }
+
+        .current-letter {
+            background: #ffe066;
+            color: #333;
+            border-radius: 5px;
+            padding: 2px 4px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+
+        .input-area {
+            margin: 15px 0;
+        }
+
+        input[type="text"] {
+            font-size: 1.5em;
+            padding: 15px;
+            border: 3px solid #ff6b6b;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            font-family: 'Comic Sans MS', cursive;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #4ecdc4;
+            box-shadow: 0 0 15px rgba(76, 205, 196, 0.3);
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        button {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            font-family: 'Comic Sans MS', cursive;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .start-btn {
+            background: #4ecdc4;
+            font-size: 1.3em;
+            padding: 20px 40px;
+        }
+
+        .start-btn:hover {
+            background: #45b7b8;
+        }
+
+        .game-over {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 20px;
+            border: 3px solid #4ecdc4;
+        }
+
+        .game-over.lose {
+            border-color: #ff6b6b;
+        }
+
+        .game-over.lose h2 {
+            color: #ff6b6b;
+        }
+
+        .game-over.win {
+            border-color: #32CD32;
+        }
+
+        .game-over.win h2 {
+            color: #32CD32;
+        }
+
+        .celebration {
+            font-size: 3em;
+            margin: 20px 0;
+            animation: rotate 2s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .floating-hearts {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .floating-heart {
+            position: absolute;
+            font-size: 1.5em;
+            color: #ff6b6b;
+            animation: float 3s linear infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .celebration-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 999;
+            display: none;
+        }
+
+        .firework {
+            position: absolute;
+            font-size: 4em;
+            animation: fireworkExplode 3s ease-out;
+        }
+
+        @keyframes fireworkExplode {
+            0% { 
+                transform: scale(0) rotate(0deg);
+                opacity: 1;
+            }
+            50% { 
+                transform: scale(1.5) rotate(180deg);
+                opacity: 1;
+            }
+            100% { 
+                transform: scale(2) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .screen-flash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,215,0,0.6) 30%, rgba(255,105,180,0.4) 60%, transparent 100%);
+            z-index: 998;
+            display: none;
+            animation: screenFlash 0.5s ease-in-out;
+        }
+
+        @keyframes screenFlash {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 107, 107, 0.95);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            font-size: 1.5em;
+            font-weight: bold;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            display: none;
+            text-align: center;
+            animation: fadeInOut 3s ease-in-out;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .name-input-screen {
+            display: block;
+            text-align: center;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            margin: 20px 0;
+            border: 3px solid #ff6b6b;
+        }
+
+        .name-input-container h2 {
+            color: #ff6b6b;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+
+        .name-input-container p {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        #playerNameInput {
+            font-size: 1.5em;
+            padding: 15px;
+            border: 3px solid #ff6b6b;
+            border-radius: 15px;
+            width: 300px;
+            text-align: center;
+            font-family: 'Comic Sans MS', cursive;
+            background: rgba(255, 255, 255, 0.9);
+            margin-bottom: 20px;
+        }
+
+        #playerNameInput:focus {
+            outline: none;
+            border-color: #4ecdc4;
+            box-shadow: 0 0 15px rgba(76, 205, 196, 0.3);
+        }
+
+        .scoreboard {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 3px solid #4ecdc4;
+            display: none;
+        }
+
+        .scoreboard h3 {
+            color: #4ecdc4;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .scoreboard-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 15px;
+            margin: 5px 0;
+            background: rgba(76, 205, 196, 0.1);
+            border-radius: 10px;
+            border-left: 4px solid #4ecdc4;
+        }
+
+        .score-item.current-player {
+            background: rgba(255, 107, 107, 0.2);
+            border-left-color: #ff6b6b;
+            font-weight: bold;
+        }
+
+        .player-name {
+            font-size: 1.1em;
+            color: #333;
+        }
+
+        .player-level {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+
+        .toggle-scoreboard {
+            background: #4ecdc4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 1em;
+            cursor: pointer;
+            font-family: 'Comic Sans MS', cursive;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-scoreboard:hover {
+            background: #45b7b8;
+            transform: translateY(-2px);
+        }
+
+        .game-content {
+            display: none;
+        }
+
+        .player-info {
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .current-player-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+
+        .personal-best {
+            font-size: 1em;
+            color: #4ecdc4;
+            font-weight: bold;
+        }
+
+        .level-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .level-display {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+
+        .ai-target {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #4169E1;
+        }
+
+        .level-up-notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #ffa726, #9c27b0, #ff6b6b);
+            background-size: 400% 400%;
+            color: white;
+            padding: 60px 80px;
+            border-radius: 30px;
+            font-size: 3.5em;
+            font-weight: bold;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 100px rgba(255, 107, 107, 0.3);
+            z-index: 1000;
+            display: none;
+            text-align: center;
+            animation: levelUpPulse 4s ease-in-out, rainbowShift 2s infinite;
+            border: 8px solid #fff;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+            min-width: 400px;
+        }
+
+        .laughing-cat {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 8em;
+            z-index: 1000;
+            display: none;
+            animation: laughingCat 3s ease-in-out;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes laughingCat {
+            0% { 
+                transform: translate(-50%, -50%) scale(0.5) rotate(-10deg);
+                opacity: 0;
+            }
+            20% { 
+                transform: translate(-50%, -50%) scale(1.2) rotate(5deg);
+                opacity: 1;
+            }
+            40% { 
+                transform: translate(-50%, -50%) scale(0.9) rotate(-3deg);
+                opacity: 1;
+            }
+            60% { 
+                transform: translate(-50%, -50%) scale(1.1) rotate(2deg);
+                opacity: 1;
+            }
+            80% { 
+                transform: translate(-50%, -50%) scale(1) rotate(-1deg);
+                opacity: 1;
+            }
+            100% { 
+                transform: translate(-50%, -50%) scale(0.8) rotate(0deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes levelUpPulse {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.3) rotate(-10deg); }
+            15% { opacity: 1; transform: translate(-50%, -50%) scale(1.3) rotate(5deg); }
+            25% { opacity: 1; transform: translate(-50%, -50%) scale(1.1) rotate(-3deg); }
+            35% { opacity: 1; transform: translate(-50%, -50%) scale(1.2) rotate(2deg); }
+            45% { opacity: 1; transform: translate(-50%, -50%) scale(1.05) rotate(-1deg); }
+            55% { opacity: 1; transform: translate(-50%, -50%) scale(1.15) rotate(1deg); }
+            65% { opacity: 1; transform: translate(-50%, -50%) scale(1.0) rotate(0deg); }
+            75% { opacity: 1; transform: translate(-50%, -50%) scale(1.1) rotate(0deg); }
+            85% { opacity: 1; transform: translate(-50%, -50%) scale(1.05) rotate(0deg); }
+            95% { opacity: 1; transform: translate(-50%, -50%) scale(1.0) rotate(0deg); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8) rotate(0deg); }
+        }
+
+        @keyframes rainbowShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-hearts" id="floatingHearts"></div>
+    
+    <div class="game-container">
+        <h1>🏁 Cat Typing Race 🏁</h1>
+        
+        <div class="name-input-screen" id="nameInputScreen">
+            <div class="name-input-container">
+                <h2>Welcome to Cat Typing Race!</h2>
+                <p>Enter your name to start racing:</p>
+                <input type="text" id="playerNameInput" placeholder="Enter your name..." maxlength="20">
+                <button class="start-btn" id="nameSubmitBtn">Start Racing! 🏁</button>
+            </div>
+        </div>
+        
+        <div class="scoreboard" id="scoreboard">
+            <h3>🏆 Leaderboard 🏆</h3>
+            <div class="scoreboard-list" id="scoreboardList">
+                <!-- Scores will be populated here -->
+            </div>
+            <button class="toggle-scoreboard" id="toggleScoreboard">Hide Scoreboard</button>
+        </div>
+        
+        <div class="game-content" id="gameContent">
+        
+        <div class="player-info">
+            <div class="current-player-name">Player: <span id="currentPlayerName">-</span></div>
+            <div class="personal-best">Personal Best: Level <span id="personalBest">1</span></div>
+        </div>
+        
+        <div class="race-track" id="raceTrack">
+            <div class="track-lane">
+                <div class="lane-label">You 🐱</div>
+                <div class="cat-racer player-cat" id="playerCat">🐱</div>
+                <div class="finish-line"></div>
+            </div>
+            <div class="track-lane">
+                <div class="lane-label">AI 🤖</div>
+                <div class="cat-racer ai-cat" id="aiCat">🐱</div>
+                <div class="finish-line"></div>
+            </div>
+        </div>
+
+        <div class="speed-display">
+            <div class="player-speed">Your Speed: <span id="playerSpeed">0</span> WPM</div>
+            <div class="ai-speed">AI Speed: <span id="aiSpeed">0</span> WPM</div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="wordsCompleted">0</div>
+                <div class="stat-label">Words</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="accuracy">100%</div>
+                <div class="stat-label">Accuracy</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="timeElapsed">0s</div>
+                <div class="stat-label">Time</div>
+            </div>
+        </div>
+        
+        <div class="level-info">
+            <div class="level-display">Level <span id="currentLevel">1</span></div>
+            <div class="ai-target">AI Target: <span id="aiTarget">5</span> WPM</div>
+        </div>
+        
+        <div class="word-display" id="wordDisplay">Click "Start Race" to begin!</div>
+        
+        <div class="input-area">
+            <input type="text" id="typingInput" placeholder="Type the word here..." disabled>
+        </div>
+        
+        <div class="buttons">
+            <button class="start-btn" id="startBtn">Start Race 🏁</button>
+            <button id="resetBtn" style="display: none;">Reset Race 🔄</button>
+            <button id="newPlayerBtn" style="display: none;">New Player 👤</button>
+        </div>
+        
+        </div> <!-- End game-content -->
+        
+        <div class="game-over" id="gameOver">
+            <div class="celebration">🎉</div>
+            <h2>Race Complete!</h2>
+            <p id="finalResult">Result will appear here</p>
+            <div class="celebration">🏁</div>
+        </div>
+        
+        <div class="notification" id="notification">
+            <div>🏁</div>
+            <div>Race Complete!</div>
+        </div>
+        
+        <div class="level-up-notification" id="levelUpNotification">
+            <div style="font-size: 1.2em; margin-bottom: 10px;">🎉✨🎉</div>
+            <div style="font-size: 1.1em; text-shadow: 4px 4px 8px rgba(0,0,0,0.7);">LEVEL UP!</div>
+            <div style="font-size: 0.8em; margin-top: 10px;">🏆 Now Level <span id="newLevel">2</span>! 🏆</div>
+            <div style="font-size: 0.6em; margin-top: 8px;">🚀 Keep Racing! 🚀</div>
+        </div>
+        
+        <div class="celebration-overlay" id="celebrationOverlay">
+            <div class="firework" style="left: 20%; top: 20%; animation-delay: 0s;">💥</div>
+            <div class="firework" style="left: 80%; top: 30%; animation-delay: 0.5s;">🎆</div>
+            <div class="firework" style="left: 60%; top: 70%; animation-delay: 1s;">💥</div>
+            <div class="firework" style="left: 30%; top: 80%; animation-delay: 1.5s;">🎆</div>
+            <div class="firework" style="left: 70%; top: 15%; animation-delay: 2s;">💥</div>
+            <div class="firework" style="left: 15%; top: 60%; animation-delay: 2.5s;">🎆</div>
+        </div>
+
+        <div class="laughing-cat" id="laughingCat">😹</div>
+    </div>
+
+    <script>
+        class CatTypingRace {
+            constructor() {
+                this.currentPlayerName = '';
+                this.scores = this.loadScores();
+                
+                this.words = {
+                    level1: ['cat', 'dog', 'sun', 'fun', 'run', 'big', 'red', 'blue', 'love', 'heart', 'hat', 'bag', 'car', 'key', 'toy', 'cup', 'pen', 'box', 'map', 'top', 'sit', 'net', 'pot', 'bed', 'leg', 'arm', 'eye', 'ear', 'zoo', 'bee', 'egg', 'ice', 'air', 'sky', 'sea'],
+                    level2: ['jump', 'play', 'happy', 'smile', 'dance', 'quick', 'fast', 'race', 'win', 'best', 'green', 'light', 'magic', 'ocean', 'party', 'tiger', 'piano', 'robot', 'castle', 'forest', 'river', 'bridge', 'flower', 'guitar', 'planet', 'rocket', 'dragon', 'wizard', 'knight', 'jungle', 'monkey', 'rainbow', 'thunder', 'shadow', 'golden'],
+                    level3: ['typing', 'speed', 'finger', 'keyboard', 'practice', 'improve', 'better', 'awesome', 'amazing', 'challenge', 'journey', 'explore', 'discover', 'creative', 'science', 'adventure', 'mystery', 'treasure', 'crystal', 'freedom', 'courage', 'promise', 'kingdom', 'special', 'victory', 'wisdom', 'powerful', 'elephant', 'butterfly', 'mountain', 'rainbow', 'unicorn', 'dinosaur', 'volcano', 'telescope'],
+                    level4: ['champion', 'winner', 'faster', 'racing', 'compete', 'skilled', 'expert', 'master', 'leader', 'triumph', 'succeed', 'achieve', 'conquer', 'overcome', 'dominate', 'excellent', 'strategic', 'tactical', 'brilliant', 'creative', 'innovative', 'dedicated', 'persistent', 'determined', 'confident', 'motivated', 'ambitious', 'focused', 'disciplined', 'organized', 'efficient', 'productive', 'successful', 'accomplished', 'experienced'],
+                    level5: ['performance', 'achievement', 'outstanding', 'fantastic', 'wonderful', 'brilliant', 'superior', 'remarkable', 'impressive', 'marvelous', 'splendid', 'terrific', 'fabulous', 'magnificent', 'exceptional', 'extraordinary', 'sensational', 'phenomenal', 'spectacular', 'incredible', 'breathtaking', 'astounding', 'stupendous', 'overwhelming', 'captivating', 'mesmerizing', 'fascinating', 'enchanting', 'delightful', 'exhilarating', 'invigorating', 'inspirational', 'motivational', 'transformative', 'revolutionary'],
+                    level6: ['acceleration', 'competition', 'lightning', 'supersonic', 'masterpiece', 'excellence', 'breathtaking', 'astounding', 'stupendous', 'overwhelming', 'incomparable', 'indescribable', 'unforgettable', 'unimaginable', 'unprecedented', 'extraordinary', 'magnificent', 'spectacular', 'phenomenal', 'incredible', 'revolutionary', 'transformation', 'understanding', 'responsibility', 'accomplishment', 'sophisticated', 'comprehensive', 'meticulous', 'intricate', 'elaborate', 'complex', 'advanced', 'professional', 'specialized', 'technical'],
+                    level7: ['incomprehensible', 'indescribable', 'unforgettable', 'unimaginable', 'incomparable', 'transformation', 'understanding', 'responsibility', 'accomplishment', 'revolutionary', 'unbelievable', 'unprecedented', 'extraordinary', 'magnificently', 'spectacularly', 'phenomenally', 'incredibly', 'breathtakingly', 'astoundingly', 'stupendously', 'overwhelmingly', 'exceptionally', 'extraordinarily', 'sensationally', 'miraculously', 'fantastically', 'wonderfully', 'brilliantly', 'remarkably', 'impressively', 'marvelously', 'splendidly', 'terrifically', 'fabulously', 'tremendously'],
+                    level8: ['internationalization', 'constitutionalization', 'counterrevolutionary', 'electroencephalogram', 'psychopharmacology', 'otorhinolaryngology', 'pneumonoultramicroscopic', 'antidisestablishmentarianism', 'floccinaucinihilipilification', 'supercalifragilisticexpialidocious', 'pseudopseudohypoparathyroidism', 'hippopotomonstrosesquippedaliophobia', 'characteristically', 'administratively', 'overwhelmingly', 'extraordinarily', 'internationally', 'constitutionally', 'uncharacteristically', 'disproportionately', 'institutionalization', 'compartmentalization', 'counterintuitive', 'pharmacologically', 'electrophysiology', 'neuropsychological', 'gastroenterology', 'dermatologically', 'cardiovascular', 'respiratory', 'musculoskeletal', 'gastrointestinal', 'endocrinological', 'immunological', 'hematological'],
+                    level9: ['antidisestablishmentarianism', 'pneumonoultramicroscopicsilicovolcanoconiosis', 'floccinaucinihilipilification', 'hippopotomonstrosesquippedaliophobia', 'supercalifragilisticexpialidocious', 'pseudopseudohypoparathyroidism', 'thyroparathyroidectomized', 'radioimmunoelectrophoresis', 'psychoneuroendocrinology', 'spectrophotometrically', 'electroencephalograph', 'tetraiodophenolphthalein', 'hepaticocholangiogastrostomy', 'pneumoencephalographically', 'psychopharmacologically', 'immunoelectrophoretically', 'roentgenographically', 'electrocardiographically', 'echoencephalographically', 'electroencephalographically', 'magnetohydrodynamically', 'otorhinolaryngologically', 'neuropsychopharmacologically', 'immunoelectrophoresis', 'radioimmunoelectrophoretically', 'spectrophotofluorometrically', 'microspectrophotometrically', 'immunofluorescently', 'electroencephalographic', 'pneumoencephalographic', 'roentgenographic', 'electrocardiographic', 'echoencephalographic', 'magnetohydrodynamic', 'otorhinolaryngologic'],
+                    level10: ['dichlorodifluoromethane', 'tetraiodophenolphthalein', 'hepaticocholangiogastrostomy', 'pneumoencephalographically', 'psychopharmacologically', 'immunoelectrophoretically', 'roentgenographically', 'electrocardiographically', 'echoencephalographically', 'electroencephalographically', 'magnetohydrodynamically', 'otorhinolaryngologically', 'neuropsychopharmacologically', 'radioimmunoelectrophoretically', 'spectrophotofluorometrically', 'microspectrophotometrically', 'deinstitutionalization', 'counterrevolutionaries', 'electroencephalograms', 'psychopharmacologists', 'otorhinolaryngologists', 'gastroenterologists', 'endocrinologists', 'dermatologists', 'cardiologists', 'neurologists', 'psychiatrists', 'radiologists', 'pathologists', 'anesthesiologists', 'ophthalmologists', 'orthopedists', 'gynecologists', 'urologists', 'oncologists'],
+                    level11: ['psychoneuroendocrinology', 'spectrophotometrically', 'electroencephalograph', 'radioimmunoelectrophoresis', 'thyroparathyroidectomized', 'immunoelectrophoresis', 'microspectrophotometry', 'electroencephalography', 'pneumoencephalography', 'echoencephalography', 'electrocardiography', 'magnetohydrodynamics', 'otorhinolaryngology', 'neuropsychopharmacology', 'radioimmunoelectrophoresis', 'spectrophotofluorometry', 'microspectrophotometry', 'immunofluorescence', 'electroencephalographic', 'pneumoencephalographic', 'roentgenographic', 'electrocardiographic', 'echoencephalographic', 'magnetohydrodynamic', 'otorhinolaryngologic', 'neuropsychopharmacologic', 'radioimmunoelectrophoretic', 'spectrophotofluorometric', 'microspectrophotometric', 'immunofluorescent', 'electroencephalographically', 'pneumoencephalographically', 'roentgenographically', 'electrocardiographically', 'echoencephalographically'],
+                    level12: ['electroencephalographically', 'pneumoencephalographically', 'roentgenographically', 'electrocardiographically', 'echoencephalographically', 'magnetohydrodynamically', 'otorhinolaryngologically', 'neuropsychopharmacologically', 'radioimmunoelectrophoretically', 'spectrophotofluorometrically', 'microspectrophotometrically', 'immunofluorescently', 'electroencephalographic', 'pneumoencephalographic', 'roentgenographic', 'electrocardiographic', 'echoencephalographic', 'magnetohydrodynamic', 'otorhinolaryngologic', 'neuropsychopharmacologic', 'radioimmunoelectrophoretic', 'spectrophotofluorometric', 'microspectrophotometric', 'immunofluorescent', 'electroencephalography', 'pneumoencephalography', 'roentgenography', 'electrocardiography', 'echoencephalography', 'magnetohydrodynamics', 'otorhinolaryngology', 'neuropsychopharmacology', 'radioimmunoelectrophoresis', 'spectrophotofluorometry', 'microspectrophotometry'],
+                    level13: ['pneumonoultramicroscopicsilicovolcanoconiosis', 'floccinaucinihilipilification', 'hippopotomonstrosesquippedaliophobia', 'supercalifragilisticexpialidocious', 'pseudopseudohypoparathyroidism', 'antidisestablishmentarianism', 'dichlorodifluoromethane', 'tetraiodophenolphthalein', 'hepaticocholangiogastrostomy', 'thyroparathyroidectomized', 'radioimmunoelectrophoresis', 'psychoneuroendocrinology', 'spectrophotometrically', 'electroencephalograph', 'immunoelectrophoresis', 'microspectrophotometry', 'electroencephalography', 'pneumoencephalography', 'echoencephalography', 'electrocardiography', 'magnetohydrodynamics', 'otorhinolaryngology', 'neuropsychopharmacology', 'radioimmunoelectrophoresis', 'spectrophotofluorometry', 'microspectrophotometry', 'immunofluorescence', 'electroencephalographic', 'pneumoencephalographic', 'roentgenographic', 'electrocardiographic', 'echoencephalographic', 'magnetohydrodynamic', 'otorhinolaryngologic', 'neuropsychopharmacologic'],
+                    level14: ['dichlorodifluoromethane', 'tetraiodophenolphthalein', 'hepaticocholangiogastrostomy', 'pneumoencephalographically', 'psychopharmacologically', 'immunoelectrophoretically', 'roentgenographically', 'electrocardiographically', 'echoencephalographically', 'electroencephalographically', 'magnetohydrodynamically', 'otorhinolaryngologically', 'neuropsychopharmacologically', 'radioimmunoelectrophoretically', 'spectrophotofluorometrically', 'microspectrophotometrically', 'immunofluorescently', 'electroencephalographic', 'pneumoencephalographic', 'roentgenographic', 'electrocardiographic', 'echoencephalographic', 'magnetohydrodynamic', 'otorhinolaryngologic', 'neuropsychopharmacologic', 'radioimmunoelectrophoretic', 'spectrophotofluorometric', 'microspectrophotometric', 'immunofluorescent', 'electroencephalography', 'pneumoencephalography', 'roentgenography', 'electrocardiography', 'echoencephalography', 'magnetohydrodynamics'],
+                    level15: ['psychoneuroendocrinology', 'spectrophotometrically', 'electroencephalograph', 'radioimmunoelectrophoresis', 'thyroparathyroidectomized', 'immunoelectrophoresis', 'microspectrophotometry', 'electroencephalography', 'pneumoencephalography', 'echoencephalography', 'electrocardiography', 'magnetohydrodynamics', 'otorhinolaryngology', 'neuropsychopharmacology', 'radioimmunoelectrophoresis', 'spectrophotofluorometry', 'microspectrophotometry', 'immunofluorescence', 'electroencephalographic', 'pneumoencephalographic', 'roentgenographic', 'electrocardiographic', 'echoencephalographic', 'magnetohydrodynamic', 'otorhinolaryngologic', 'neuropsychopharmacologic', 'radioimmunoelectrophoretic', 'spectrophotofluorometric', 'microspectrophotometric', 'immunofluorescent', 'electroencephalographically', 'pneumoencephalographically', 'roentgenographically', 'electrocardiographically', 'echoencephalographically'],
+                    level16: ['pneumonoultramicroscopicsilicovolcanoconiosis', 'floccinaucinihilipilification', 'hippopotomonstrosesquippedaliophobia', 'supercalifragilisticexpialidocious', 'pseudopseudohypoparathyroidism', 'antidisestablishmentarianism', 'dichlorodifluoromethane', 'tetraiodophenolphthalein', 'hepaticocholangiogastrostomy', 'thyroparathyroidectomized', 'radioimmunoelectrophoresis', 'psychoneuroendocrinology', 'spectrophotometrically', 'electroencephalograph', 'immunoelectrophoresis', 'microspectrophotometry', 'electroencephalography', 'pneumoencephalography', 'echoencephalography', 'electrocardiography', 'magnetohydrodynamics', 'otorhinolaryngology', 'neuropsychopharmacology', 'radioimmunoelectrophoresis', 'spectrophotofluorometry', 'microspectrophotometry', 'immunofluorescence', 'electroencephalographic', 'pneumoencephalographic', 'roentgenographic', 'electrocardiographic', 'echoencephalographic', 'magnetohydrodynamic', 'otorhinolaryngologic', 'neuropsychopharmacologic'],
+                    level17: ['dichlorodifluoromethane', 'tetraiodophenolphthalein', 'hepaticocholangiogastrostomy', 'pneumoencephalographically', 'psychopharmacologically', 'immunoelectrophoretically', 'roentgenographically', 'electrocardiographically', 'echoencephalographically', 'electroencephalographically', 'magnetohydrodynamically', 'otorhinolaryngologically', 'neuropsychopharmacologically', 'radioimmunoelectrophoretically', 'spectrophotofluorometrically', 'microspectrophotometrically', 'immunofluorescently', 'electroencephalographic', 'pneumoencephalographic', 'roentgenographic', 'electrocardiographic', 'echoencephalographic', 'magnetohydrodynamic', 'otorhinolaryngologic', 'neuropsychopharmacologic', 'radioimmunoelectrophoretic', 'spectrophotofluorometric', 'microspectrophotometric', 'immunofluorescent', 'electroencephalography', 'pneumoencephalography', 'roentgenography', 'electrocardiography', 'echoencephalography', 'magnetohydrodynamics'],
+                    level18: ['pneumonoultramicroscopicsilicovolcanoconiosis', 'floccinaucinihilipilification', 'hippopotomonstrosesquippedaliophobia', 'supercalifragilisticexpialidocious', 'pseudopseudohypoparathyroidism', 'antidisestablishmentarianism', 'dichlorodifluoromethane', 'tetraiodophenolphthalein', 'hepaticocholangiogastrostomy', 'thyroparathyroidectomized', 'radioimmunoelectrophoresis', 'psychoneuroendocrinology', 'spectrophotometrically', 'electroencephalograph', 'immunoelectrophoresis', 'microspectrophotometry', 'electroencephalography', 'pneumoencephalography', 'echoencephalography', 'electrocardiography', 'magnetohydrodynamics', 'otorhinolaryngology', 'neuropsychopharmacology', 'radioimmunoelectrophoresis', 'spectrophotofluorometry', 'microspectrophotometry', 'immunofluorescence', 'electroencephalographic', 'pneumoencephalographic', 'roentgenographic', 'electrocardiographic', 'echoencephalographic', 'magnetohydrodynamic', 'otorhinolaryngologic', 'neuropsychopharmacologic'],
+                    level19: ['dichlorodifluoromethane', 'tetraiodophenolphthalein', 'hepaticocholangiogastrostomy', 'pneumoencephalographically', 'psychopharmacologically', 'immunoelectrophoretically', 'roentgenographically', 'electrocardiographically', 'echoencephalographically', 'electroencephalographically', 'magnetohydrodynamically', 'otorhinolaryngologically', 'neuropsychopharmacologically', 'radioimmunoelectrophoretically', 'spectrophotofluorometrically', 'microspectrophotometrically', 'immunofluorescently', 'electroencephalographic', 'pneumoencephalographic', 'roentgenographic', 'electrocardiographic', 'echoencephalographic', 'magnetohydrodynamic', 'otorhinolaryngologic', 'neuropsychopharmacologic', 'radioimmunoelectrophoretic', 'spectrophotofluorometric', 'microspectrophotometric', 'immunofluorescent', 'electroencephalography', 'pneumoencephalography', 'roentgenography', 'electrocardiography', 'echoencephalography', 'magnetohydrodynamics'],
+                    level20: ['pneumonoultramicroscopicsilicovolcanoconiosis', 'floccinaucinihilipilification', 'hippopotomonstrosesquippedaliophobia', 'supercalifragilisticexpialidocious', 'pseudopseudohypoparathyroidism', 'antidisestablishmentarianism', 'dichlorodifluoromethane', 'tetraiodophenolphthalein', 'hepaticocholangiogastrostomy', 'thyroparathyroidectomized', 'radioimmunoelectrophoresis', 'psychoneuroendocrinology', 'spectrophotometrically', 'electroencephalograph', 'immunoelectrophoresis', 'microspectrophotometry', 'electroencephalography', 'pneumoencephalography', 'echoencephalography', 'electrocardiography', 'magnetohydrodynamics', 'otorhinolaryngology', 'neuropsychopharmacology', 'radioimmunoelectrophoresis', 'spectrophotofluorometry', 'microspectrophotometry', 'immunofluorescence', 'electroencephalographic', 'pneumoencephalographic', 'roentgenographic', 'electrocardiographic', 'echoencephalographic', 'magnetohydrodynamic', 'otorhinolaryngologic', 'neuropsychopharmacologic']
+                };
+                
+                this.currentWord = '';
+                this.currentIndex = 0;
+                this.currentLevel = 1;
+                this.racesWon = 0;
+                this.gameActive = false;
+                this.startTime = 0;
+                this.wordsTyped = 0;
+                this.totalKeystrokes = 0;
+                this.incorrectKeystrokes = 0;
+                this.playerPosition = 0;
+                this.aiPosition = 0;
+                this.aiSpeed = 0;
+                this.raceDistance = 100;
+                this.gameTimer = null;
+                this.aiTimer = null;
+                this.wordsToWin = 10;
+                this.previousInputLength = 0;
+                this.shuffledWords = [];
+                this.wordIndex = 0;
+                
+                this.initializeElements();
+                this.setupEventListeners();
+                this.createFloatingHearts();
+                this.initializeSounds();
+                this.showNameInput();
+            }
+
+            initializeElements() {
+                this.elements = {
+                    wordDisplay: document.getElementById('wordDisplay'),
+                    typingInput: document.getElementById('typingInput'),
+                    startBtn: document.getElementById('startBtn'),
+                    resetBtn: document.getElementById('resetBtn'),
+                    gameOver: document.getElementById('gameOver'),
+                    finalResult: document.getElementById('finalResult'),
+                    floatingHearts: document.getElementById('floatingHearts'),
+                    notification: document.getElementById('notification'),
+                    playerCat: document.getElementById('playerCat'),
+                    aiCat: document.getElementById('aiCat'),
+                    playerSpeed: document.getElementById('playerSpeed'),
+                    aiSpeed: document.getElementById('aiSpeed'),
+                    wordsCompleted: document.getElementById('wordsCompleted'),
+                    accuracy: document.getElementById('accuracy'),
+                    timeElapsed: document.getElementById('timeElapsed'),
+                    currentLevel: document.getElementById('currentLevel'),
+                    aiTarget: document.getElementById('aiTarget'),
+                    levelUpNotification: document.getElementById('levelUpNotification'),
+                    newLevel: document.getElementById('newLevel'),
+                    celebrationOverlay: document.getElementById('celebrationOverlay'),
+                    laughingCat: document.getElementById('laughingCat'),
+                    nameInputScreen: document.getElementById('nameInputScreen'),
+                    playerNameInput: document.getElementById('playerNameInput'),
+                    nameSubmitBtn: document.getElementById('nameSubmitBtn'),
+                    gameContent: document.getElementById('gameContent'),
+                    scoreboard: document.getElementById('scoreboard'),
+                    scoreboardList: document.getElementById('scoreboardList'),
+                    toggleScoreboard: document.getElementById('toggleScoreboard'),
+                    currentPlayerName: document.getElementById('currentPlayerName'),
+                    personalBest: document.getElementById('personalBest'),
+                    newPlayerBtn: document.getElementById('newPlayerBtn')
+                };
+            }
+
+            setupEventListeners() {
+                this.elements.startBtn.addEventListener('click', () => this.startRace());
+                this.elements.resetBtn.addEventListener('click', () => this.resetRace());
+                this.elements.newPlayerBtn.addEventListener('click', () => this.showNameInput());
+                this.elements.nameSubmitBtn.addEventListener('click', () => this.submitName());
+                this.elements.toggleScoreboard.addEventListener('click', () => this.toggleScoreboard());
+                this.elements.typingInput.addEventListener('input', (e) => this.handleTyping(e));
+                this.elements.typingInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.checkWord();
+                });
+                this.elements.playerNameInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.submitName();
+                });
+            }
+
+            setAISpeed() {
+                // Exponential AI speed growth: Level 1 = 5 WPM, Level 20 = 120 WPM
+                // Using exponential formula: speed = 5 * (1.18^(level-1))
+                // This gives: L1=5, L5=20, L10=50, L15=80, L20=120 WPM
+                this.aiSpeed = Math.round(5 * Math.pow(1.18, this.currentLevel - 1));
+                this.elements.aiTarget.textContent = this.aiSpeed;
+                
+                // Update AI animal icon based on level
+                this.elements.aiCat.textContent = this.getAIAnimal(this.currentLevel);
+            }
+
+            getAIAnimal(level) {
+                const animals = [
+                    '🐢', // Level 1 - Turtle
+                    '🐌', // Level 2 - Snail
+                    '🦆', // Level 3 - Duck
+                    '🐸', // Level 4 - Frog
+                    '🐇', // Level 5 - Rabbit
+                    '🐿️', // Level 6 - Squirrel
+                    '🐈', // Level 7 - Cat
+                    '🐕', // Level 8 - Dog
+                    '🐺', // Level 9 - Wolf
+                    '🦊', // Level 10 - Fox
+                    '🐎', // Level 11 - Horse
+                    '🦌', // Level 12 - Deer
+                    '🐅', // Level 13 - Tiger
+                    '🐆', // Level 14 - Leopard
+                    '🦁', // Level 15 - Lion
+                    '🐯', // Level 16 - Tiger Face
+                    '🐪', // Level 17 - Camel
+                    '🦏', // Level 18 - Rhino
+                    '🐘', // Level 19 - Elephant
+                    '🐆'  // Level 20 - Cheetah (fastest big cat)
+                ];
+                
+                return animals[Math.min(level - 1, animals.length - 1)];
+            }
+
+            startRace() {
+                this.gameActive = true;
+                this.startTime = Date.now();
+                this.wordsTyped = 0;
+                this.totalKeystrokes = 0;
+                this.incorrectKeystrokes = 0;
+                this.playerPosition = 0;
+                this.aiPosition = 0;
+                this.currentIndex = 0;
+                this.previousInputLength = 0;
+                
+                this.elements.startBtn.style.display = 'none';
+                this.elements.resetBtn.style.display = 'inline-block';
+                this.elements.typingInput.disabled = false;
+                this.elements.gameOver.style.display = 'none';
+                
+                this.setAISpeed();
+                this.updateLevelDisplay();
+                this.updateDisplay();
+                this.nextWord();
+                this.startGameTimer();
+                this.startAIMovement();
+                this.elements.typingInput.focus();
+            }
+
+            shuffleWords() {
+                const levelKey = `level${Math.min(this.currentLevel, 20)}`;
+                const wordList = [...this.words[levelKey]]; // Create a copy
+                
+                // Fisher-Yates shuffle algorithm
+                for (let i = wordList.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [wordList[i], wordList[j]] = [wordList[j], wordList[i]];
+                }
+                
+                this.shuffledWords = wordList;
+                this.wordIndex = 0;
+            }
+
+            nextWord() {
+                if (!this.gameActive) return;
+                
+                // If we've used all words or haven't shuffled yet, reshuffle
+                if (this.wordIndex >= this.shuffledWords.length || this.shuffledWords.length === 0) {
+                    this.shuffleWords();
+                }
+                
+                this.currentWord = this.shuffledWords[this.wordIndex];
+                this.wordIndex++;
+                this.currentIndex = 0;
+                this.previousInputLength = 0;
+                this.elements.typingInput.value = '';
+                this.displayWord();
+                this.elements.typingInput.focus();
+            }
+
+            displayWord() {
+                let displayHTML = '';
+                for (let i = 0; i < this.currentWord.length; i++) {
+                    const letter = this.currentWord[i];
+                    if (i < this.currentIndex) {
+                        displayHTML += `<span class="typed-letter">${letter}</span>`;
+                    } else if (i === this.currentIndex) {
+                        displayHTML += `<span class="current-letter">${letter}</span>`;
+                    } else {
+                        displayHTML += letter;
+                    }
+                }
+                this.elements.wordDisplay.innerHTML = displayHTML;
+            }
+
+            handleTyping(e) {
+                if (!this.gameActive) return;
+                
+                const typed = e.target.value;
+                const previousLength = this.previousInputLength || 0;
+                const currentLength = typed.length;
+                
+                // Handle backspace - reset currentIndex to match input length
+                if (currentLength < previousLength) {
+                    this.currentIndex = Math.min(currentLength, this.currentWord.length - 1);
+                    this.displayWord();
+                    this.updatePlayerSpeed();
+                    this.updateDisplay();
+                    this.previousInputLength = currentLength;
+                    return;
+                }
+                
+                // Handle new character input
+                if (currentLength > previousLength && currentLength > 0) {
+                    this.totalKeystrokes++;
+                    const lastTyped = typed[typed.length - 1];
+                    const expectedLetter = this.currentWord[this.currentIndex];
+                    
+                    if (lastTyped === expectedLetter) {
+                        this.currentIndex++;
+                        this.playSound('type');
+                        
+                        if (this.currentIndex >= this.currentWord.length) {
+                            this.wordCompleted();
+                            return;
+                        }
+                    } else {
+                        this.incorrectKeystrokes++;
+                        this.playSound('mistake');
+                        e.target.value = typed.slice(0, -1);
+                        this.previousInputLength = e.target.value.length;
+                        return;
+                    }
+                }
+                
+                this.previousInputLength = currentLength;
+                this.displayWord();
+                this.updatePlayerSpeed();
+                this.updateDisplay();
+            }
+
+            wordCompleted() {
+                this.wordsTyped++;
+                this.playSound('success');
+                
+                // Move player forward
+                this.playerPosition += (100 / this.wordsToWin);
+                this.updateCatPositions();
+                
+                // Check for win
+                if (this.playerPosition >= this.raceDistance) {
+                    this.raceComplete('win');
+                    return;
+                }
+                
+                setTimeout(() => {
+                    this.nextWord();
+                }, 500);
+            }
+
+            updatePlayerSpeed() {
+                if (this.totalKeystrokes === 0) return;
+                
+                const timeElapsed = (Date.now() - this.startTime) / 1000 / 60; // minutes
+                const wpm = Math.round((this.totalKeystrokes / 5) / timeElapsed);
+                this.elements.playerSpeed.textContent = Math.max(0, wpm);
+            }
+
+            startGameTimer() {
+                this.gameTimer = setInterval(() => {
+                    if (!this.gameActive) return;
+                    
+                    const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+                    this.elements.timeElapsed.textContent = elapsed + 's';
+                    
+                    const accuracy = this.totalKeystrokes > 0 ? 
+                        Math.round(((this.totalKeystrokes - this.incorrectKeystrokes) / this.totalKeystrokes) * 100) : 100;
+                    this.elements.accuracy.textContent = accuracy + '%';
+                }, 100);
+            }
+
+            startAIMovement() {
+                this.aiTimer = setInterval(() => {
+                    if (!this.gameActive) return;
+                    
+                    // AI moves based on word completion rate, not continuous movement
+                    const speedVariation = 0.8 + Math.random() * 0.4; // 80% to 120% of base speed
+                    const currentAiSpeed = this.aiSpeed * speedVariation;
+                    
+                    // Calculate average word length (assuming 5 characters per word)
+                    const avgWordLength = 5;
+                    const wordsPerMinute = currentAiSpeed / avgWordLength;
+                    const wordsPerSecond = wordsPerMinute / 60;
+                    
+                    // Move AI based on estimated words completed per second
+                    const moveAmount = wordsPerSecond * (100 / this.wordsToWin);
+                    
+                    this.aiPosition += moveAmount;
+                    this.elements.aiSpeed.textContent = Math.round(currentAiSpeed);
+                    
+                    this.updateCatPositions();
+                    
+                    // Check for AI win
+                    if (this.aiPosition >= this.raceDistance) {
+                        this.raceComplete('lose');
+                    }
+                }, 1000);
+            }
+
+            updateCatPositions() {
+                const trackWidth = this.elements.playerCat.parentElement.offsetWidth - 60; // Account for cat size
+                
+                const playerPercent = Math.min(this.playerPosition / this.raceDistance, 1);
+                const aiPercent = Math.min(this.aiPosition / this.raceDistance, 1);
+                
+                this.elements.playerCat.style.left = (playerPercent * trackWidth) + 'px';
+                this.elements.aiCat.style.left = (aiPercent * trackWidth) + 'px';
+            }
+
+            updateDisplay() {
+                this.elements.wordsCompleted.textContent = this.wordsTyped;
+            }
+
+            raceComplete(result) {
+                this.gameActive = false;
+                clearInterval(this.gameTimer);
+                clearInterval(this.aiTimer);
+                
+                this.playSound(result === 'win' ? 'victory' : 'defeat');
+                this.showNotification(result);
+                
+                const finalTime = Math.floor((Date.now() - this.startTime) / 1000);
+                const finalWPM = this.elements.playerSpeed.textContent;
+                const finalAccuracy = this.elements.accuracy.textContent;
+                
+                if (result === 'win') {
+                    this.racesWon++;
+                    
+                    setTimeout(() => {
+                        if (this.racesWon % 1 === 0) { // Level up every win
+                            this.currentLevel++;
+                            this.updatePersonalBest();
+                            this.shuffledWords = []; // Reset shuffled words for new level
+                            this.wordIndex = 0;
+                            this.showLevelUp();
+                            
+                            setTimeout(() => {
+                                this.startNextRace();
+                            }, 3000);
+                        } else {
+                            this.startNextRace();
+                        }
+                    }, 1500);
+                } else {
+                    setTimeout(() => {
+                        this.elements.gameOver.classList.add(result);
+                        this.elements.gameOver.querySelector('h2').textContent = 'AI Won! 🤖';
+                        this.elements.gameOver.querySelector('.celebration').textContent = '😿';
+                        
+                        this.elements.finalResult.innerHTML = `
+                            <strong>Final Results:</strong><br>
+                            Level Reached: ${this.currentLevel}<br>
+                            Races Won: ${this.racesWon}<br>
+                            Time: ${finalTime}s<br>
+                            Speed: ${finalWPM} WPM<br>
+                            Accuracy: ${finalAccuracy}<br>
+                            Words Typed: ${this.wordsTyped}
+                        `;
+                        
+                        this.elements.gameOver.style.display = 'block';
+                        this.elements.typingInput.disabled = true;
+                    }, 2000);
+                }
+            }
+
+            resetRace() {
+                this.gameActive = false;
+                clearInterval(this.gameTimer);
+                clearInterval(this.aiTimer);
+                
+                this.wordsTyped = 0;
+                this.totalKeystrokes = 0;
+                this.incorrectKeystrokes = 0;
+                this.playerPosition = 0;
+                this.aiPosition = 0;
+                this.currentIndex = 0;
+                this.previousInputLength = 0;
+                
+                this.elements.startBtn.style.display = 'inline-block';
+                this.elements.resetBtn.style.display = 'none';
+                this.elements.gameOver.style.display = 'none';
+                this.elements.typingInput.disabled = true;
+                this.elements.typingInput.value = '';
+                this.elements.wordDisplay.innerHTML = 'Click "Start Race" to begin!';
+                this.elements.playerSpeed.textContent = '0';
+                this.elements.aiSpeed.textContent = '0';
+                this.elements.wordsCompleted.textContent = '0';
+                this.elements.accuracy.textContent = '100%';
+                this.elements.timeElapsed.textContent = '0s';
+                
+                // Reset cat positions
+                this.elements.playerCat.style.left = '0px';
+                this.elements.aiCat.style.left = '0px';
+                
+                // Remove game-over classes
+                this.elements.gameOver.classList.remove('win', 'lose');
+                
+                this.currentLevel = 1;
+                this.racesWon = 0;
+                this.updateLevelDisplay();
+                this.setAISpeed();
+                this.updatePersonalBest();
+            }
+
+            spawnCelebrationEffects() {
+                for (let i = 0; i < 20; i++) {
+                    setTimeout(() => {
+                        const effect = document.createElement('div');
+                        effect.className = 'floating-heart';
+                        effect.textContent = ['🏆', '🎉', '⭐', '💖', '🌟'][Math.floor(Math.random() * 5)];
+                        effect.style.left = Math.random() * 100 + '%';
+                        effect.style.animationDelay = Math.random() * 0.5 + 's';
+                        this.elements.floatingHearts.appendChild(effect);
+                        
+                        setTimeout(() => {
+                            effect.remove();
+                        }, 3000);
+                    }, i * 100);
+                }
+            }
+
+            createFloatingHearts() {
+                setInterval(() => {
+                    if (Math.random() < 0.05) {
+                        const heart = document.createElement('div');
+                        heart.className = 'floating-heart';
+                        heart.textContent = '💖';
+                        heart.style.left = Math.random() * 100 + '%';
+                        heart.style.fontSize = (Math.random() * 0.5 + 1) + 'em';
+                        this.elements.floatingHearts.appendChild(heart);
+                        
+                        setTimeout(() => {
+                            heart.remove();
+                        }, 3000);
+                    }
+                }, 3000);
+            }
+
+            updateLevelDisplay() {
+                this.elements.currentLevel.textContent = this.currentLevel;
+            }
+
+            showLevelUp() {
+                this.elements.newLevel.textContent = this.currentLevel;
+                
+                // Screen flash effect
+                const screenFlash = document.createElement('div');
+                screenFlash.className = 'screen-flash';
+                document.body.appendChild(screenFlash);
+                screenFlash.style.display = 'block';
+                
+                // Show fireworks overlay
+                const celebrationOverlay = document.getElementById('celebrationOverlay');
+                celebrationOverlay.style.display = 'block';
+                
+                // Main notification
+                this.elements.levelUpNotification.style.display = 'block';
+                
+                // Play multiple sound effects
+                this.playSound('levelUp');
+                setTimeout(() => this.playSound('victory'), 500);
+                setTimeout(() => this.playSound('levelUp'), 1000);
+                
+                // Massive celebration effects - way more particles!
+                for (let i = 0; i < 50; i++) {
+                    setTimeout(() => {
+                        const effect = document.createElement('div');
+                        effect.className = 'floating-heart';
+                        effect.textContent = ['🎉', '⭐', '🌟', '✨', '🏆', '🎊', '🎈', '💫', '🌈', '🔥', '💎', '👑', '🚀'][Math.floor(Math.random() * 13)];
+                        effect.style.left = Math.random() * 100 + '%';
+                        effect.style.fontSize = (Math.random() * 2 + 1.5) + 'em';
+                        effect.style.animationDelay = Math.random() * 0.8 + 's';
+                        effect.style.color = ['#ff6b6b', '#4ecdc4', '#ffa726', '#9c27b0', '#00ff00', '#ff1493', '#ffd700'][Math.floor(Math.random() * 7)];
+                        this.elements.floatingHearts.appendChild(effect);
+                        
+                        setTimeout(() => {
+                            effect.remove();
+                        }, 4000);
+                    }, i * 80);
+                }
+                
+                // Additional burst effects
+                for (let burst = 0; burst < 3; burst++) {
+                    setTimeout(() => {
+                        for (let i = 0; i < 20; i++) {
+                            const burstEffect = document.createElement('div');
+                            burstEffect.className = 'floating-heart';
+                            burstEffect.textContent = ['💥', '⚡', '🌟', '✨'][Math.floor(Math.random() * 4)];
+                            burstEffect.style.left = (45 + Math.random() * 10) + '%';
+                            burstEffect.style.fontSize = (Math.random() * 1.5 + 2) + 'em';
+                            burstEffect.style.animationDelay = Math.random() * 0.3 + 's';
+                            this.elements.floatingHearts.appendChild(burstEffect);
+                            
+                            setTimeout(() => {
+                                burstEffect.remove();
+                            }, 2000);
+                        }
+                    }, burst * 1000);
+                }
+                
+                setTimeout(() => {
+                    this.elements.levelUpNotification.style.display = 'none';
+                    celebrationOverlay.style.display = 'none';
+                    screenFlash.remove();
+                }, 3500);
+            }
+
+            startNextRace() {
+                this.gameActive = true;
+                this.playerPosition = 0;
+                this.aiPosition = 0;
+                this.wordsTyped = 0;
+                this.totalKeystrokes = 0;
+                this.incorrectKeystrokes = 0;
+                this.currentIndex = 0;
+                this.previousInputLength = 0;
+                this.startTime = Date.now();
+                
+                this.elements.playerCat.style.left = '0px';
+                this.elements.aiCat.style.left = '0px';
+                this.elements.playerSpeed.textContent = '0';
+                this.elements.aiSpeed.textContent = '0';
+                this.elements.wordsCompleted.textContent = '0';
+                this.elements.accuracy.textContent = '100%';
+                this.elements.timeElapsed.textContent = '0s';
+                
+                this.setAISpeed();
+                this.updateLevelDisplay();
+                this.nextWord();
+                this.startGameTimer();
+                this.startAIMovement();
+                this.elements.typingInput.focus();
+            }
+
+            initializeSounds() {
+                this.sounds = {
+                    type: this.createSound(400, 0.05, 'sine'),
+                    success: this.createSound(800, 0.1, 'sine'),
+                    mistake: this.createSound(200, 0.1, 'sawtooth'),
+                    victory: this.createSound(1200, 0.8, 'triangle'),
+                    defeat: this.createSadTrombone(),
+                    levelUp: this.createSound(2000, 1.0, 'triangle')
+                };
+            }
+
+            createSound(frequency, duration, type = 'sine') {
+                return () => {
+                    try {
+                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+                        
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+                        
+                        oscillator.frequency.value = frequency;
+                        oscillator.type = type;
+                        
+                        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+                        
+                        oscillator.start(audioContext.currentTime);
+                        oscillator.stop(audioContext.currentTime + duration);
+                    } catch (error) {
+                        console.log('Audio not supported:', error);
+                    }
+                };
+            }
+
+            createSadTrombone() {
+                return () => {
+                    try {
+                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        const notes = [
+                            { freq: 440, duration: 0.35 },    // A4
+                            { freq: 415, duration: 0.35 },    // A♭4
+                            { freq: 392, duration: 0.35 },    // G4
+                            { freq: 370, duration: 0.35 },    // F♯4
+                            { freq: 349, duration: 0.35 },    // F4
+                            { freq: 330, duration: 0.35 },    // E4
+                            { freq: 311, duration: 0.35 },    // E♭4
+                            { freq: 294, duration: 0.7 }     // D4 (longer final note)
+                        ];
+                        
+                        let currentTime = audioContext.currentTime;
+                        
+                        notes.forEach((note, index) => {
+                            const oscillator = audioContext.createOscillator();
+                            const gainNode = audioContext.createGain();
+                            
+                            oscillator.connect(gainNode);
+                            gainNode.connect(audioContext.destination);
+                            
+                            oscillator.frequency.value = note.freq;
+                            oscillator.type = 'sawtooth'; // Trombone-like sound
+                            
+                            // Start quieter and fade out
+                            gainNode.gain.setValueAtTime(0.15, currentTime);
+                            gainNode.gain.exponentialRampToValueAtTime(0.01, currentTime + note.duration);
+                            
+                            oscillator.start(currentTime);
+                            oscillator.stop(currentTime + note.duration);
+                            
+                            currentTime += note.duration * 0.9; // Slight overlap
+                        });
+                    } catch (error) {
+                        console.log('Audio not supported:', error);
+                    }
+                };
+            }
+
+            playSound(soundName) {
+                if (this.sounds && this.sounds[soundName]) {
+                    this.sounds[soundName]();
+                }
+            }
+
+            showNotification(result) {
+                this.elements.notification.innerHTML = `
+                    <div>${result === 'win' ? '🏆' : '🤖'}</div>
+                    <div>${result === 'win' ? 'You Won!' : 'AI Won!'}</div>
+                    <div>Race Complete!</div>
+                `;
+                this.elements.notification.style.display = 'block';
+                
+                // Show laughing cat animation when player loses
+                if (result === 'lose') {
+                    setTimeout(() => {
+                        this.elements.laughingCat.style.display = 'block';
+                        setTimeout(() => {
+                            this.elements.laughingCat.style.display = 'none';
+                        }, 3000);
+                    }, 1000); // Start after sad trombone begins
+                }
+                
+                setTimeout(() => {
+                    this.elements.notification.style.display = 'none';
+                }, 3000);
+            }
+
+            showNameInput() {
+                this.elements.nameInputScreen.style.display = 'block';
+                this.elements.gameContent.style.display = 'none';
+                this.elements.scoreboard.style.display = 'block';
+                this.updateScoreboard();
+                this.elements.playerNameInput.focus();
+            }
+
+            submitName() {
+                const name = this.elements.playerNameInput.value.trim();
+                if (name.length === 0) {
+                    alert('Please enter your name!');
+                    return;
+                }
+
+                this.currentPlayerName = name;
+                this.elements.currentPlayerName.textContent = name;
+                this.elements.nameInputScreen.style.display = 'none';
+                this.elements.gameContent.style.display = 'block';
+                this.elements.scoreboard.style.display = 'none';
+                this.elements.newPlayerBtn.style.display = 'inline-block';
+
+                this.updatePersonalBest();
+                this.elements.typingInput.focus();
+            }
+
+            loadScores() {
+                const saved = localStorage.getItem('catTypingRaceScores');
+                return saved ? JSON.parse(saved) : {};
+            }
+
+            saveScores() {
+                localStorage.setItem('catTypingRaceScores', JSON.stringify(this.scores));
+            }
+
+            updatePersonalBest() {
+                const currentBest = this.scores[this.currentPlayerName] || 1;
+                const newBest = Math.max(currentBest, this.currentLevel);
+
+                this.scores[this.currentPlayerName] = newBest;
+                this.elements.personalBest.textContent = newBest;
+
+                this.saveScores();
+            }
+
+            updateScoreboard() {
+                const scoreboardList = this.elements.scoreboardList;
+                scoreboardList.innerHTML = '';
+
+                // Sort scores by level (highest first)
+                const sortedScores = Object.entries(this.scores)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 10); // Top 10
+
+                if (sortedScores.length === 0) {
+                    scoreboardList.innerHTML = '<p style="text-align: center; color: #666;">No scores yet! Be the first to play!</p>';
+                    return;
+                }
+
+                sortedScores.forEach(([name, level], index) => {
+                    const scoreItem = document.createElement('div');
+                    scoreItem.className = 'score-item';
+                    if (name === this.currentPlayerName) {
+                        scoreItem.classList.add('current-player');
+                    }
+
+                    scoreItem.innerHTML = `
+                        <div class="player-name">${index + 1}. ${name}</div>
+                        <div class="player-level">Level ${level}</div>
+                    `;
+
+                    scoreboardList.appendChild(scoreItem);
+                });
+            }
+
+            toggleScoreboard() {
+                const isVisible = this.elements.scoreboard.style.display !== 'none';
+                this.elements.scoreboard.style.display = isVisible ? 'none' : 'block';
+                this.elements.toggleScoreboard.textContent = isVisible ? 'Show Scoreboard' : 'Hide Scoreboard';
+
+                if (!isVisible) {
+                    this.updateScoreboard();
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new CatTypingRace();
+        });
+    </script>
+</body>
+</html>
