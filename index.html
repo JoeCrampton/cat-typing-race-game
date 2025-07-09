@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cat Typing Race</title>
+    
+    <!-- Google AdSense (replace with your actual publisher ID) -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXXX"
+            crossorigin="anonymous"></script>
+    
     <style>
         * {
             margin: 0;
@@ -16,11 +21,37 @@
             background: linear-gradient(135deg, #87CEEB 0%, #98FB98 50%, #FFE4B5 100%);
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
             padding: 10px;
             overflow-x: hidden;
             margin: 0;
+        }
+
+        .page-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            max-width: 1400px;
+            width: 100%;
+            align-items: flex-start;
+        }
+
+        .ad-sidebar {
+            width: 160px;
+            height: 600px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+        }
+
+        /* Hide ads on smaller screens */
+        @media (max-width: 1300px) {
+            .ad-sidebar {
+                display: none;
+            }
         }
 
         .game-container {
@@ -28,11 +59,12 @@
             border-radius: 20px;
             padding: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            max-width: 1000px;
+            max-width: 900px;
             width: 100%;
             text-align: center;
-            max-height: 95vh;
+            max-height: 90vh;
             overflow-y: auto;
+            flex-grow: 1;
         }
 
         h1 {
@@ -611,7 +643,21 @@
 <body>
     <div class="floating-hearts" id="floatingHearts"></div>
     
-    <div class="game-container">
+    <div class="page-container">
+        <!-- Left Sidebar Ad -->
+        <div class="ad-sidebar left">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
+                 data-ad-slot="0987654321"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>
+                 (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+        
+        <div class="game-container">
         <h1>🏁 Cat Typing Race 🏁</h1>
         
         <div class="name-input-screen" id="nameInputScreen">
@@ -1482,5 +1528,20 @@
             new CatTypingRace();
         });
     </script>
+        </div>
+        
+        <!-- Right Sidebar Ad -->
+        <div class="ad-sidebar right">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
+                 data-ad-slot="1122334455"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>
+                 (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+    </div>
 </body>
 </html>
