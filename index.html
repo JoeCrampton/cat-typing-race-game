@@ -56,30 +56,32 @@
 
         .game-container {
             background: rgba(255, 255, 255, 0.9);
-            border-radius: 20px;
-            padding: 15px;
+            border-radius: 15px;
+            padding: 10px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             max-width: 900px;
             width: 100%;
             text-align: center;
-            max-height: 90vh;
-            overflow-y: auto;
+            height: 600px;
+            overflow-y: hidden;
             flex-grow: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         h1 {
             color: #ff6b6b;
-            font-size: 2em;
-            margin-bottom: 10px;
+            font-size: 1.6em;
+            margin-bottom: 5px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .race-track {
             background: rgba(144, 238, 144, 0.3);
-            border-radius: 15px;
-            padding: 15px;
-            margin: 10px 0;
-            border: 3px solid #32CD32;
+            border-radius: 10px;
+            padding: 8px;
+            margin: 5px 0;
+            border: 2px solid #32CD32;
             position: relative;
             overflow: hidden;
         }
@@ -87,16 +89,16 @@
         .track-lane {
             display: flex;
             align-items: center;
-            margin: 8px 0;
-            height: 60px;
+            margin: 4px 0;
+            height: 45px;
             background: rgba(255, 255, 255, 0.5);
-            border-radius: 10px;
+            border-radius: 8px;
             position: relative;
-            border: 2px dashed #ccc;
+            border: 1px dashed #ccc;
         }
 
         .cat-racer {
-            font-size: 2.5em;
+            font-size: 2em;
             position: absolute;
             left: 0;
             transition: left 0.3s ease;
@@ -135,8 +137,8 @@
         .speed-display {
             display: flex;
             justify-content: space-between;
-            margin: 8px 0;
-            font-size: 1em;
+            margin: 4px 0;
+            font-size: 0.9em;
             font-weight: bold;
         }
 
@@ -149,17 +151,17 @@
         }
 
         .word-display {
-            font-size: 1.8em;
+            font-size: 1.5em;
             color: #333;
-            margin: 15px 0;
-            min-height: 50px;
+            margin: 8px 0;
+            min-height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
             background: rgba(255, 255, 255, 0.8);
-            border-radius: 15px;
-            padding: 15px;
-            border: 3px solid #ff6b6b;
+            border-radius: 10px;
+            padding: 10px;
+            border: 2px solid #ff6b6b;
         }
 
         .typed-letter {
@@ -183,14 +185,14 @@
         }
 
         .input-area {
-            margin: 15px 0;
+            margin: 8px 0;
         }
 
         input[type="text"] {
-            font-size: 1.5em;
-            padding: 15px;
-            border: 3px solid #ff6b6b;
-            border-radius: 15px;
+            font-size: 1.3em;
+            padding: 10px;
+            border: 2px solid #ff6b6b;
+            border-radius: 10px;
             width: 100%;
             max-width: 400px;
             text-align: center;
@@ -206,18 +208,18 @@
 
         .buttons {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             justify-content: center;
-            margin-top: 15px;
+            margin-top: 8px;
         }
 
         button {
             background: #ff6b6b;
             color: white;
             border: none;
-            padding: 15px 30px;
-            border-radius: 25px;
-            font-size: 1.1em;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 1em;
             cursor: pointer;
             font-family: 'Comic Sans MS', cursive;
             transition: all 0.3s ease;
@@ -383,10 +385,10 @@
         .stats {
             display: flex;
             justify-content: space-around;
-            margin: 10px 0;
+            margin: 6px 0;
             background: rgba(255, 255, 255, 0.6);
-            border-radius: 10px;
-            padding: 10px;
+            border-radius: 8px;
+            padding: 6px;
         }
 
         .stat-item {
@@ -394,13 +396,13 @@
         }
 
         .stat-value {
-            font-size: 1.5em;
+            font-size: 1.2em;
             font-weight: bold;
             color: #ff6b6b;
         }
 
         .stat-label {
-            font-size: 0.9em;
+            font-size: 0.8em;
             color: #666;
         }
 
@@ -516,9 +518,9 @@
 
         .player-info {
             background: rgba(255, 255, 255, 0.6);
-            border-radius: 10px;
-            padding: 10px;
-            margin: 10px 0;
+            border-radius: 8px;
+            padding: 6px;
+            margin: 5px 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -540,10 +542,10 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 10px 0;
+            margin: 5px 0;
             background: rgba(255, 255, 255, 0.6);
-            border-radius: 10px;
-            padding: 10px;
+            border-radius: 8px;
+            padding: 6px;
         }
 
         .level-display {
@@ -874,10 +876,14 @@
             }
 
             setAISpeed() {
-                // Exponential AI speed growth: Level 1 = 5 WPM, Level 20 = 120 WPM
-                // Using exponential formula: speed = 5 * (1.18^(level-1))
-                // This gives: L1=5, L5=20, L10=50, L15=80, L20=120 WPM
-                this.aiSpeed = Math.round(5 * Math.pow(1.18, this.currentLevel - 1));
+                // Aggressive exponential AI speed growth for faster difficulty
+                // Level 1=8, L2=12, L3=18, L4=27, L5=40, L6=60, L7=90, L8=135, L9=200, L10=300+ WPM
+                // Using exponential formula: speed = 8 * (1.5^(level-1))
+                this.aiSpeed = Math.round(8 * Math.pow(1.5, this.currentLevel - 1));
+                
+                // Cap at reasonable maximum for very high levels
+                this.aiSpeed = Math.min(this.aiSpeed, 500);
+                
                 this.elements.aiTarget.textContent = this.aiSpeed;
                 
                 // Update AI animal icon based on level
